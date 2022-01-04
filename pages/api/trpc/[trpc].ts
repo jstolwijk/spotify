@@ -1,5 +1,6 @@
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
+import { AudioFeatures } from "../../../types/audio-features";
 
 var token: string | null = null;
 var expAt: number = Date.now();
@@ -42,14 +43,32 @@ const fetchCurrentlyPlayingTrack = async () => {
 interface GetCurrentActivity {
   title: string;
   artists: string[];
+  audioFeatures: AudioFeatures;
 }
 
+let cachedTrackId: string | null = null;
+let cachedAudioFeatures: AudioFeatures | null = null;
+
+const getAudioFeatures = async (trackId: string): Promise<AudioFeatures> => {
+  if (cachedTrackId === trackId) {
+    return cachedAudioFeatures!;
+  }
+  const response = await fetch("https://api.spotify.com/v1/audio-features?ids=" + trackId, {
+    headers: {
+      Authorization: `Bearer ${await getToken()}`,
+    },
+  });
+
+  cachedAudioFeatures = ((await response.json()) as any).audio_features[0];
+  return cachedAudioFeatures!;
+};
 const appRouter = trpc.router().query("get-current-activity", {
   async resolve() {
     const body = await fetchCurrentlyPlayingTrack();
     const res: GetCurrentActivity = {
       title: body.item.name,
       artists: body.item.artists.map((artist: any) => artist.name),
+      audioFeatures: await getAudioFeatures(body.item.id),
     };
 
     return res;
