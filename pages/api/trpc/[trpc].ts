@@ -44,6 +44,7 @@ interface GetCurrentActivity {
   title: string;
   artists: string[];
   audioFeatures: AudioFeatures;
+  url: string;
 }
 
 let cachedTrackId: string | null = null;
@@ -67,6 +68,7 @@ const appRouter = trpc.router().query("get-current-activity", {
     const body = await fetchCurrentlyPlayingTrack();
     const res: GetCurrentActivity = {
       title: body.item.name,
+      url: body.item.external_urls.spotify,
       artists: body.item.artists.map((artist: any) => artist.name),
       audioFeatures: await getAudioFeatures(body.item.id),
     };
