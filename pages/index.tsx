@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import { trpc } from "../utils/trpc";
 
 const Home: NextPage = () => {
-  const activity = trpc.useQuery(["get-current-activity"], { refetchInterval: 10000 });
+  const activity = trpc.useQuery(["get-current-activity"], { refetchInterval: 5000 });
 
   return (
     <div className="h-screen w-screen flex flex-col justify-center items-center">

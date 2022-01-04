@@ -1,7 +1,17 @@
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
 
+var token: string | null = null;
+var expAt: number = Date.now();
+
 const getToken = async () => {
+  if (token && expAt > Date.now()) {
+    console.log("Using cached token");
+    return token;
+  }
+
+  console.log("Fetching new token");
+
   const res = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
@@ -11,7 +21,12 @@ const getToken = async () => {
     body: `grant_type=refresh_token&refresh_token=${process.env.REFRESH_TOKEN}`,
   });
 
-  return (await res.json()).access_token;
+  const responseBody = await res.json();
+
+  token = responseBody.access_token;
+  expAt = Date.now() + responseBody.expires_in * 1000;
+
+  return responseBody.access_token;
 };
 
 const fetchCurrentlyPlayingTrack = async () => {
