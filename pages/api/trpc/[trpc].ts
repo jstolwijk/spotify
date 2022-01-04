@@ -6,7 +6,7 @@ const getToken = async () => {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: "Basic " + btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`),
+      Authorization: "Basic " + Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString("base64"),
     },
     body: `grant_type=refresh_token&refresh_token=${process.env.REFRESH_TOKEN}`,
   });
