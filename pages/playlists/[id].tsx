@@ -19,6 +19,10 @@ const Playlist: NextPage = () => {
 
   const playlist = trpc.useQuery(["playlist", playlistId]);
   const genres = orderByFrequency(playlist.data?.tracks?.items?.flatMap((item: any) => item.track.genres) ?? []);
+
+  if (!playlist.data) {
+    return null;
+  }
   return (
     <div>
       <h1 className="text-4xl">{playlist.data?.name}</h1>

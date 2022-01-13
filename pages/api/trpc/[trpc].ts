@@ -174,8 +174,7 @@ const appRouter = trpc
       const artistIds = playlist?.tracks?.items?.map((item) => item.track.artists[0].id) ?? [];
       const albumIds = playlist?.tracks?.items?.map((item) => item.track.album.id) ?? [];
 
-      const artists = await getArtists(artistIds);
-      const albums = await getAlbums(albumIds);
+      const [artists, albums] = await Promise.all([getArtists(artistIds), getAlbums(albumIds)]);
 
       const response: Playlist = {
         ...playlist,
