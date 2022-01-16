@@ -84,22 +84,6 @@ const getPlaylist = async (id: string) => {
   return await response.json();
 };
 
-const getArtists = async (artistIds: string[]): Promise<Artist[]> => {
-  const chunks = sliceIntoChunks(artistIds, 50);
-  const fetches = await Promise.all(chunks.map((chunk) => fetchArtists(chunk)));
-
-  return fetches.flatMap((artists) => artists.artists);
-};
-
-const fetchArtists = async (artistIds: string[]) => {
-  const response = await fetch("https://api.spotify.com/v1/artists?ids=" + artistIds.join(","), {
-    headers: {
-      Authorization: `Bearer ${await getToken()}`,
-    },
-  });
-  return await response.json();
-};
-
 function sliceIntoChunks(arr: any[], chunkSize: number) {
   const res = [];
   for (let i = 0; i < arr.length; i += chunkSize) {
@@ -109,50 +93,40 @@ function sliceIntoChunks(arr: any[], chunkSize: number) {
   return res;
 }
 
-const getAlbums = async (albumsId: string[]): Promise<Album[]> => {
-  const chunks = sliceIntoChunks(albumsId, 20);
-  const fetches = await Promise.all(chunks.map((chunk) => fetchAlbums(chunk)));
+const getArtists = async (artistIds: string[]): Promise<Artist[]> =>
+  fetchWithMultipleIds("https://api.spotify.com/v1/artists", artistIds);
 
-  return fetches.flatMap((albums) => albums.albums);
+const getAlbums = async (albumsId: string[]): Promise<Album[]> =>
+  fetchWithMultipleIds("https://api.spotify.com/v1/albums", albumsId);
+
+const getAudioFeaturesBatch = async (trackIds: string[]): Promise<AudioFeatures[]> =>
+  fetchWithMultipleIds("https://api.spotify.com/v1/audio-features", trackIds);
+
+// TODO: investigate the batch size per endpoint
+const fetchWithMultipleIds = async <T>(url: string, ids: string[], batchSize: number = 20): Promise<T> => {
+  const chunks = sliceIntoChunks(ids, batchSize);
+  const fetches = await Promise.all(chunks.map((chunk) => fetchWithMultipleIdsDelegate<T>(url, chunk)));
+
+  // wonderful peace of code, lets keep this between us
+  return fetches
+    .flatMap((f) => Object.values(f))
+    .flat()
+    .filter((i) => !!i) as unknown as T;
 };
 
-const fetchAlbums = async (albumsId: string[]): Promise<AlbumsResponse> => {
-  const response = await fetch("https://api.spotify.com/v1/albums?ids=" + albumsId.join(","), {
+const fetchWithMultipleIdsDelegate = async <T>(url: string, ids: string[]): Promise<T> => {
+  const response = await fetch(url + "?ids=" + ids.join(","), {
     headers: {
       Authorization: `Bearer ${await getToken()}`,
     },
   });
 
-  return await response.json();
-};
-
-const getAudioFeaturesBatch = async (songId: string[]): Promise<AudioFeatures[]> => {
-  const chunks = sliceIntoChunks(songId, 20); // TODO: validate limit
-  const fetches = await Promise.all(chunks.map((chunk) => fetchAudioFeatures(chunk)));
-
-  return fetches.flatMap((res: any) => res.audio_features);
-};
-
-const fetchAudioFeatures = async (albumsId: string[]): Promise<AlbumsResponse> => {
-  const response = await fetch("https://api.spotify.com/v1/audio-features?ids=" + albumsId.join(","), {
-    headers: {
-      Authorization: `Bearer ${await getToken()}`,
-    },
-  });
-
-  return await response.json();
-};
-
-const getRecommendations = async (trackId: string): Promise<AudioFeatures> => {
-  "https://api.spotify.com/v1/recommendations?limit=10&seed_artists=3r1XkJ7vCs8kHBSzGvPLdP&seed_genres=sad&seed_tracks=5SpZDtg5U1W35HNjq1xYrM";
-  const response = await fetch("https://api.spotify.com/v1/audio-features?ids=" + trackId, {
-    headers: {
-      Authorization: `Bearer ${await getToken()}`,
-    },
-  });
-
-  cachedAudioFeatures = ((await response.json()) as any).audio_features[0];
-  return cachedAudioFeatures!;
+  if (response.ok) {
+    return await response.json();
+  } else {
+    console.error("Failed to fetch, response from spotify: " + (await response.text()));
+    throw Error(`Failed to fetch: '${url}', ${response.status}`);
+  }
 };
 
 const appRouter = trpc
@@ -192,7 +166,7 @@ const appRouter = trpc
       const albumIds = playlist?.tracks?.items?.map((item) => item.track.album.id) ?? [];
       const songIds = playlist?.tracks?.items?.map((item) => item.track.id) ?? [];
 
-      const [artists, audioFeatues, albums] = await Promise.all([
+      const [artists, audioFeatures, albums] = await Promise.all([
         getArtists(artistIds),
         getAudioFeaturesBatch(songIds),
         getAlbums(albumIds),
@@ -205,9 +179,8 @@ const appRouter = trpc
           items: playlist.tracks.items.map((item) => {
             const album = albums.find((album) => album.id === item.track.album.id);
             const artist = artists.find((artist: Artist) => artist.id === item.track.artists[0].id);
-            const audioFeature = audioFeatues.find(
-              (audioFeatures: AudioFeatures) => audioFeatures.id === item.track.id
-            )!;
+            const audioFeature = audioFeatures.find((audioFeatures) => audioFeatures.id === item.track.id);
+
             let genres = [];
 
             if ((album?.genres ?? [])?.length > 0) {

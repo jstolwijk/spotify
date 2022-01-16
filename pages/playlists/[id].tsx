@@ -31,7 +31,7 @@ const Playlist: NextPage = () => {
       </h3>
       <h3>
         Avg danceability:
-        {(playlist.data?.tracks?.items?.reduce((acc, item) => acc + item.track.audio_features.danceability, 0) ?? 0) /
+        {(playlist.data?.tracks?.items?.reduce((acc, item) => acc + item.track.audio_features?.danceability, 0) ?? 0) /
           playlist.data?.tracks?.items?.length ?? 0}
       </h3>
       <div className="p-4" />
