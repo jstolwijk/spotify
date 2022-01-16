@@ -1,3 +1,5 @@
+import { AudioFeatures } from "./audio-features";
+
 export interface ExternalUrls {
   spotify: string;
 }
@@ -116,6 +118,7 @@ export interface Track {
 
   // ugly hack add genres
   genres: string[];
+  audio_features: AudioFeatures;
 }
 
 export interface VideoThumbnail {

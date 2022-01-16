@@ -126,6 +126,23 @@ const fetchAlbums = async (albumsId: string[]): Promise<AlbumsResponse> => {
   return await response.json();
 };
 
+const getAudioFeaturesBatch = async (songId: string[]): Promise<AudioFeatures[]> => {
+  const chunks = sliceIntoChunks(songId, 20); // TODO: validate limit
+  const fetches = await Promise.all(chunks.map((chunk) => fetchAudioFeatures(chunk)));
+
+  return fetches.flatMap((res: any) => res.audio_features);
+};
+
+const fetchAudioFeatures = async (albumsId: string[]): Promise<AlbumsResponse> => {
+  const response = await fetch("https://api.spotify.com/v1/audio-features?ids=" + albumsId.join(","), {
+    headers: {
+      Authorization: `Bearer ${await getToken()}`,
+    },
+  });
+
+  return await response.json();
+};
+
 const getRecommendations = async (trackId: string): Promise<AudioFeatures> => {
   "https://api.spotify.com/v1/recommendations?limit=10&seed_artists=3r1XkJ7vCs8kHBSzGvPLdP&seed_genres=sad&seed_tracks=5SpZDtg5U1W35HNjq1xYrM";
   const response = await fetch("https://api.spotify.com/v1/audio-features?ids=" + trackId, {
@@ -173,8 +190,13 @@ const appRouter = trpc
 
       const artistIds = playlist?.tracks?.items?.map((item) => item.track.artists[0].id) ?? [];
       const albumIds = playlist?.tracks?.items?.map((item) => item.track.album.id) ?? [];
+      const songIds = playlist?.tracks?.items?.map((item) => item.track.id) ?? [];
 
-      const [artists, albums] = await Promise.all([getArtists(artistIds), getAlbums(albumIds)]);
+      const [artists, audioFeatues, albums] = await Promise.all([
+        getArtists(artistIds),
+        getAudioFeaturesBatch(songIds),
+        getAlbums(albumIds),
+      ]);
 
       const response: Playlist = {
         ...playlist,
@@ -182,9 +204,10 @@ const appRouter = trpc
           ...playlist.tracks,
           items: playlist.tracks.items.map((item) => {
             const album = albums.find((album) => album.id === item.track.album.id);
-
             const artist = artists.find((artist: Artist) => artist.id === item.track.artists[0].id);
-
+            const audioFeature = audioFeatues.find(
+              (audioFeatures: AudioFeatures) => audioFeatures.id === item.track.id
+            )!;
             let genres = [];
 
             if ((album?.genres ?? [])?.length > 0) {
@@ -198,6 +221,7 @@ const appRouter = trpc
               track: {
                 ...item.track,
                 genres,
+                audio_features: audioFeature,
               },
             };
           }),

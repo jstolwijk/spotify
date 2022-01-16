@@ -10,4 +10,5 @@ export interface AudioFeatures {
   liveness: number;
   valence: number;
   tempo: number;
+  id: string;
 }

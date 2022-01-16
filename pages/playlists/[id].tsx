@@ -29,11 +29,17 @@ const Playlist: NextPage = () => {
       <h3 className="text-2xl">
         Top genres: {genres[0]}, {genres[1]}, {genres[2]}, {genres[3]}, {genres[4]}
       </h3>
+      <h3>
+        Avg danceability:
+        {(playlist.data?.tracks?.items?.reduce((acc, item) => acc + item.track.audio_features.danceability, 0) ?? 0) /
+          playlist.data?.tracks?.items?.length ?? 0}
+      </h3>
       <div className="p-4" />
       <ul>
-        {playlist.data?.tracks?.items?.map((item: any) => (
+        {playlist.data?.tracks?.items?.map((item) => (
           <li key={item.track.id}>
             {item.track.name} - {item.track.genres.join(",")}
+            <div>{JSON.stringify(item.track.audio_features)}</div>
           </li>
         ))}
       </ul>
