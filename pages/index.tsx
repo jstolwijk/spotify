@@ -35,9 +35,6 @@ const Home: NextPage = () => {
             <h2 className="mt-8 text-3xl">{activity.data?.artists?.join(", ")}</h2>
           </div>
         </a>
-        <div className="flex flex-col mt-8 p-8">
-          <pre>{JSON.stringify(activity.data?.audioFeatures, null, 2)}</pre>
-        </div>
       </div>
     </div>
   );
