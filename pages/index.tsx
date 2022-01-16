@@ -28,12 +28,13 @@ const Home: NextPage = () => {
           "h-screen w-screen flex flex-col justify-center items-center " + getBg(activity?.data?.audioFeatures)
         }
       >
-        <a href={activity.data?.url} target="_blank" rel="noreferrer">
-          <div className="flex flex-col border p-8 hover:underline cursor-pointer">
+        <div className="flex flex-col border p-8 ">
+          <a href={activity.data?.url} target="_blank" rel="noreferrer" className="hover:underline cursor-pointer">
             <h1 className="text-5xl font-bold ">{activity.data?.title || "No music playing 😭"}</h1>
             <h2 className="mt-8 text-3xl">{activity.data?.artists?.join(", ")}</h2>
-          </div>
-        </a>
+          </a>
+          {activity.data?.isPlaying === false && <h3 className="mt-8 text-2xl italic">Track paused</h3>}
+        </div>
         <div className="pt-8 font-bold text-2xl">
           <Link href="/playlists">Jesses public playlists</Link>
         </div>
