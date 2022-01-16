@@ -93,13 +93,13 @@ function sliceIntoChunks(arr: any[], chunkSize: number) {
   return res;
 }
 
-const getArtists = async (artistIds: string[]): Promise<Artist[]> =>
+const getArtists = (artistIds: string[]): Promise<Artist[]> =>
   fetchWithMultipleIds("https://api.spotify.com/v1/artists", artistIds);
 
-const getAlbums = async (albumsId: string[]): Promise<Album[]> =>
+const getAlbums = (albumsId: string[]): Promise<Album[]> =>
   fetchWithMultipleIds("https://api.spotify.com/v1/albums", albumsId);
 
-const getAudioFeaturesBatch = async (trackIds: string[]): Promise<AudioFeatures[]> =>
+const getAudioFeaturesBatch = (trackIds: string[]): Promise<AudioFeatures[]> =>
   fetchWithMultipleIds("https://api.spotify.com/v1/audio-features", trackIds);
 
 // TODO: investigate the batch size per endpoint
