@@ -1,6 +1,5 @@
 import type { NextPage } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import { AudioFeatures } from "../types/audio-features";
 import { trpc } from "../utils/trpc";
@@ -48,6 +47,14 @@ const Home: NextPage = () => {
           {activity.data?.isPlaying === false && <h3 className="m-8 text-2xl italic">Track paused</h3>}
         </div>
       </div>
+      <a
+        className="absolute bottom-0 right-0 p-4 font-semibold"
+        href="https://github.com/jstolwijk/spotify"
+        target="_blank"
+        rel="noreferrer"
+      >
+        github
+      </a>
     </div>
   );
 };
