@@ -147,7 +147,6 @@ const appRouter = trpc
         return null;
       }
 
-      console.log(body);
       const res: GetCurrentActivity = {
         title: body.item.name,
         url: body.item.external_urls.spotify,
