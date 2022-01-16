@@ -1,7 +1,7 @@
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
 import { AudioFeatures } from "../../../types/audio-features";
-import { Album, AlbumsResponse, Artist, Artist2, Playlist } from "../../../types/playlist";
+import { Album, Artist, Playlist } from "../../../types/playlist";
 
 var token: string | null = null;
 var expAt: number = Date.now();
@@ -38,7 +38,11 @@ const fetchCurrentlyPlayingTrack = async () => {
     },
   });
 
-  return await response.json();
+  try {
+    return await response.json();
+  } catch (e) {
+    return null;
+  }
 };
 
 interface GetCurrentActivity {
@@ -134,6 +138,11 @@ const appRouter = trpc
   .query("get-current-activity", {
     async resolve() {
       const body = await fetchCurrentlyPlayingTrack();
+
+      if (!body) {
+        return null;
+      }
+
       const res: GetCurrentActivity = {
         title: body.item.name,
         url: body.item.external_urls.spotify,
