@@ -23,7 +23,6 @@ const Home: NextPage = () => {
 
   return (
     <div>
-      <Link href="/playlists">Jesses wonderful Playlists</Link>
       <div
         className={
           "h-screen w-screen flex flex-col justify-center items-center " + getBg(activity?.data?.audioFeatures)
@@ -35,6 +34,9 @@ const Home: NextPage = () => {
             <h2 className="mt-8 text-3xl">{activity.data?.artists?.join(", ")}</h2>
           </div>
         </a>
+        <div className="pt-8 font-bold text-2xl">
+          <Link href="/playlists">Jesses public playlists</Link>
+        </div>
       </div>
     </div>
   );
