@@ -179,7 +179,7 @@ const appRouter = trpc
           items: playlist.tracks.items.map((item) => {
             const album = albums.find((album) => album.id === item.track.album.id);
             const artist = artists.find((artist: Artist) => artist.id === item.track.artists[0].id);
-            const audioFeature = audioFeatures.find((audioFeatures) => audioFeatures.id === item.track.id);
+            const audioFeature = audioFeatures.find((audioFeatures) => audioFeatures.id === item.track.id)!;
 
             let genres = [];
 
