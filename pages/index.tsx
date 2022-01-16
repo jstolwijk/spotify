@@ -41,14 +41,11 @@ const Home: NextPage = () => {
               <Image src={activity.data?.image} alt="Album art" width={640} height={640} />
             </div>
           )}
-          <a href={activity.data?.url} target="_blank" rel="noreferrer" className="hover:underline cursor-pointer  p-8">
+          <a href={activity.data?.url} target="_blank" rel="noreferrer" className="hover:underline cursor-pointer py-8">
             <h1 className="text-5xl font-bold ">{activity.data?.title || "No music playing 😭"}</h1>
-            <h2 className="mt-8 text-3xl">{activity.data?.artists?.join(", ")}</h2>
           </a>
+          <h2 className="text-3xl">{activity.data?.artists?.join(", ")}</h2>
           {activity.data?.isPlaying === false && <h3 className="m-8 text-2xl italic">Track paused</h3>}
-        </div>
-        <div className="pt-8 font-bold text-2xl">
-          <Link href="/playlists">Jesses public playlists</Link>
         </div>
       </div>
     </div>
