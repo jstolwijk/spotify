@@ -23,6 +23,7 @@ const Playlist: NextPage = () => {
   if (!playlist.data) {
     return null;
   }
+
   return (
     <div>
       <h1 className="text-4xl">{playlist.data?.name}</h1>

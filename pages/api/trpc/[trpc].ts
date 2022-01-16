@@ -51,6 +51,9 @@ interface GetCurrentActivity {
   audioFeatures: AudioFeatures;
   url: string;
   isPlaying: boolean;
+  image: string;
+  progressMs: number;
+  durationMs: number;
 }
 
 let cachedTrackId: string | null = null;
@@ -144,12 +147,16 @@ const appRouter = trpc
         return null;
       }
 
+      console.log(body);
       const res: GetCurrentActivity = {
         title: body.item.name,
         url: body.item.external_urls.spotify,
         artists: body.item.artists.map((artist: any) => artist.name),
         audioFeatures: await getAudioFeatures(body.item.id),
         isPlaying: body.is_playing,
+        image: body.item.album.images[0].url,
+        progressMs: body.progress_ms,
+        durationMs: body.item.duration_ms,
       };
 
       return res;
