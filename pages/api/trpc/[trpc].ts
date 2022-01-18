@@ -124,6 +124,12 @@ const fetchWithMultipleIds = async <T>(url: string, ids: string[], batchSize: nu
     .filter((i) => !!i) as unknown as T;
 };
 
+function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+  if (value === null || value === undefined) return false;
+  const testDummy: TValue = value;
+  return true;
+}
+
 const fetchWithMultipleIdsDelegate = async <T>(url: string, ids: string[]): Promise<T> => {
   const response = await fetch(url + "?ids=" + ids.join(","), {
     headers: {
@@ -183,9 +189,11 @@ const appRouter = trpc
     async resolve(req) {
       const playlist: Playlist = await getPlaylist(req.input);
 
-      const artistIds = playlist?.tracks?.items?.map((item) => item.track.artists[0].id) ?? [];
-      const albumIds = playlist?.tracks?.items?.map((item) => item.track.album.id) ?? [];
-      const songIds = playlist?.tracks?.items?.map((item) => item.track.id) ?? [];
+      const filteredTracks = playlist.tracks.items.filter((track) => notEmpty(track.track));
+
+      const artistIds = filteredTracks.map((item) => item.track.artists[0].id);
+      const albumIds = filteredTracks.map((item) => item.track.album.id);
+      const songIds = filteredTracks.map((item) => item.track.id);
 
       const [artists, audioFeatures, albums] = await Promise.all([
         getArtists(artistIds),
@@ -193,11 +201,13 @@ const appRouter = trpc
         getAlbums(albumIds),
       ]);
 
+      console.log("Artists: " + artists);
+
       const response: Playlist = {
         ...playlist,
         tracks: {
           ...playlist.tracks,
-          items: playlist.tracks.items.map((item) => {
+          items: filteredTracks.map((item) => {
             const album = albums.find((album) => album.id === item.track.album.id);
             const artist = artists.find((artist: Artist) => artist.id === item.track.artists[0].id);
             const audioFeature = audioFeatures.find((audioFeatures) => audioFeatures.id === item.track.id)!;
