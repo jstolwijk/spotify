@@ -12,6 +12,10 @@ const orderByFrequency = (array: string[]) => {
   return sorted;
 };
 
+const avarage = (array: number[]) => {
+  return array.reduce((acc, curr) => acc + curr, 0) / array.length;
+};
+
 const Playlist: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
@@ -23,24 +27,43 @@ const Playlist: NextPage = () => {
   if (!playlist.data) {
     return null;
   }
+  const avgDanceability = avarage(
+    playlist.data.tracks.items.map((item: any) => item.track.audio_features.danceability)
+  );
+  const avgEnergy = avarage(playlist.data.tracks.items.map((item: any) => item.track.audio_features.energy));
 
   return (
-    <div>
-      <h1 className="text-4xl">{playlist.data?.name}</h1>
+    <div className="container mx-auto py-8">
+      <h1 className="text-4xl font-bold">{playlist.data?.name}</h1>
       <h3 className="text-2xl">
         Top genres: {genres[0]}, {genres[1]}, {genres[2]}, {genres[3]}, {genres[4]}
       </h3>
-      <h3>
-        Avg danceability:
-        {(playlist.data?.tracks?.items?.reduce((acc, item) => acc + item.track.audio_features?.danceability, 0) ?? 0) /
-          playlist.data?.tracks?.items?.length ?? 0}
-      </h3>
-      <div className="p-4" />
-      <ul>
+      <h3>Avg danceability: {avgDanceability}</h3>
+      <h3>Avg energy: {avgEnergy}</h3>
+      <ul className="pt-4">
         {playlist.data?.tracks?.items?.map((item) => (
-          <li key={item.track.id}>
-            {item.track.name} - {item.track.genres.join(",")}
-            <div>{JSON.stringify(item.track.audio_features)}</div>
+          <li key={item.track.id} className="flex p-2">
+            <div>{item.track.name}</div>
+            <div className="pl-4">{item.track.artists.map((it) => it.name).join(", ")}</div>
+            <div className=" flex-grow" />
+            <div
+              className={
+                Math.abs(item.track.audio_features?.danceability - avgDanceability) > 0.2
+                  ? "underline decoration-pink-500 w-32"
+                  : "w-32"
+              }
+            >
+              {item.track.audio_features?.danceability}
+            </div>
+            <div
+              className={
+                Math.abs(item.track.audio_features?.energy - avgEnergy) > 0.2 ? "underline decoration-pink-500" : ""
+              }
+            >
+              {item.track.audio_features?.energy}
+            </div>
+            {/* <div>{item.track.genres.join(",")}</div> */}
+            {/* <div>{JSON.stringify(item.track.audio_features)}</div> */}
           </li>
         ))}
       </ul>
