@@ -23,7 +23,7 @@ const Home: NextPage = () => {
   const activity = trpc.useQuery(["get-current-activity"], { refetchInterval: 5000 });
 
   return (
-    <div className="overflow-hidden h-screen">
+    <div className={"overflow-hidden h-screen " + getBg(activity?.data?.audioFeatures)}>
       {activity.data && (
         <ProgressBar
           progressMs={activity.data?.progressMs}
@@ -31,10 +31,8 @@ const Home: NextPage = () => {
           bg={getBg(activity?.data?.audioFeatures)}
         />
       )}
-      <div
-        className={"h-full w-screen flex flex-col justify-center items-center " + getBg(activity?.data?.audioFeatures)}
-      >
-        <div className="flex flex-col max-w-screen-sm">
+      <div className={"h-full flex flex-col justify-center items-center"}>
+        <div className="flex flex-col p-8">
           {activity.data?.image && (
             <div>
               <Image src={activity.data?.image} alt="Album art" width={640} height={640} />
