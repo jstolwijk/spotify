@@ -39,9 +39,11 @@ const Home: NextPage = () => {
             </div>
           )}
           <a href={activity.data?.url} target="_blank" rel="noreferrer" className="hover:underline cursor-pointer py-8">
-            <h1 className="text-5xl font-bold ">{activity.data?.title || "No music playing 😭"}</h1>
+            <div className="border p-2">
+              <h1 className="text-5xl font-bold ">{activity.data?.title || "No music playing 😭"}</h1>
+              <h2 className="pt-2 text-3xl">{activity.data?.artists?.join(", ")}</h2>
+            </div>
           </a>
-          <h2 className="text-3xl">{activity.data?.artists?.join(", ")}</h2>
           {activity.data?.isPlaying === false && <h3 className="m-8 text-2xl italic">Track paused</h3>}
         </div>
       </div>

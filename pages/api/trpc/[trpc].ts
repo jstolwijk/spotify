@@ -54,6 +54,8 @@ interface GetCurrentActivity {
   image: string;
   progressMs: number;
   durationMs: number;
+  contextType: string;
+  contextTitle: string;
 }
 
 let cachedTrackId: string | null = null;
@@ -156,6 +158,8 @@ const appRouter = trpc
         image: body.item.album.images[0].url,
         progressMs: body.progress_ms,
         durationMs: body.item.duration_ms,
+        contextType: body.context.type,
+        contextTitle: body.item.album.name,
       };
 
       return res;
