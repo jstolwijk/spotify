@@ -11,8 +11,8 @@ const TrackedUsers: NextPage = () => {
       <h2>Tracked users</h2>
       <div>
         <ul>
-          {trackedUsers.data?.map((user) => (
-            <li>{user}</li>
+          {trackedUsers.data?.map((user, index) => (
+            <li key={index}>{user}</li>
           ))}
         </ul>
         <button className="p-2 rounded bg-white text-black" onClick={() => console.log("Add")}>Add</button>
