@@ -146,6 +146,10 @@ const fetchWithMultipleIdsDelegate = async <T>(url: string, ids: string[]): Prom
   }
 };
 
+interface TrackedUsers {
+  users: string[]
+}
+
 const appRouter = trpc
   .router()
   .query("get-current-activity", {
@@ -184,7 +188,8 @@ const appRouter = trpc
   })
   .query("tracked-users", {
     async resolve() {
-      return await get("tracked-users");
+      // set("tracked-users", ["z2p00o6istx8sbaifs3g0c13s"], true);
+      return await get<TrackedUsers[]>("tracked-users");;
     }
   })
   .query("playlist", {
