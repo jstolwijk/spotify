@@ -1,5 +1,6 @@
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
+import { get, set } from "../../../lib/kv";
 import { AudioFeatures } from "../../../types/audio-features";
 import { Album, Artist, Playlist } from "../../../types/playlist";
 
@@ -181,6 +182,11 @@ const appRouter = trpc
       return await getPlaylists();
     },
   })
+  .query("tracked-users", {
+    async resolve() {
+      return await get("tracked-users");
+    }
+  })
   .query("playlist", {
     input: (val: unknown) => {
       if (typeof val === "string") return val;
@@ -189,7 +195,9 @@ const appRouter = trpc
     async resolve(req) {
       const playlist: Playlist = await getPlaylist(req.input);
 
-      const filteredTracks = playlist.tracks.items.filter((track) => notEmpty(track.track));
+      const filteredTracks = playlist.tracks.items.filter((track) =>
+        notEmpty(track.track)
+      );
 
       const artistIds = filteredTracks.map((item) => item.track.artists[0].id);
       const albumIds = filteredTracks.map((item) => item.track.album.id);
@@ -208,9 +216,15 @@ const appRouter = trpc
         tracks: {
           ...playlist.tracks,
           items: filteredTracks.map((item) => {
-            const album = albums.find((album) => album.id === item.track.album.id);
-            const artist = artists.find((artist: Artist) => artist.id === item.track.artists[0].id);
-            const audioFeature = audioFeatures.find((audioFeatures) => audioFeatures.id === item.track.id)!;
+            const album = albums.find(
+              (album) => album.id === item.track.album.id
+            );
+            const artist = artists.find(
+              (artist: Artist) => artist.id === item.track.artists[0].id
+            );
+            const audioFeature = audioFeatures.find(
+              (audioFeatures) => audioFeatures.id === item.track.id
+            )!;
 
             let genres = [];
 
